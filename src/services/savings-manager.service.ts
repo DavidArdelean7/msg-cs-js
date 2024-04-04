@@ -13,22 +13,28 @@ export class SavingsManagerService {
 
     const nextSystemDate = dayjs(this.systemDate).add(1, 'months');
 
-    savingAccounts.forEach(savingAccount => {
-      if (savingAccount.interestFrequency === CapitalizationFrequency.MONTHLY) {
-        this.addMonthlyInterest(savingAccount, nextSystemDate);
-      }
-    });
+    savingAccounts.forEach(savingAccount =>
+      this.addIntervalInterest(savingAccount, nextSystemDate, savingAccount.interestFrequency)
+    );
 
     this.systemDate = nextSystemDate.toDate();
   }
 
-  private addMonthlyInterest(savingAccount: SavingsAccountModel, currentInterestMonth: dayjs.Dayjs): void {
-    const nextInterestDateForAccount = dayjs(savingAccount.lastInterestAppliedDate).add(1, 'months');
+  //merged both types of capitalization frequency in the same function to avoid code repetition and unnecessary conditional statements
+  //added checking for the day, besides month and year, to prevent erroneously balance increase
+  private addIntervalInterest(
+    savingAccount: SavingsAccountModel,
+    currentInterestMonth: dayjs.Dayjs,
+    frequency: CapitalizationFrequency
+  ): void {
+    const interval = frequency === CapitalizationFrequency.MONTHLY ? 1 : 3;
+    const nextInterestDateForAccount = dayjs(savingAccount.lastInterestAppliedDate).add(interval, 'months');
 
     const sameMonth = currentInterestMonth.isSame(nextInterestDateForAccount, 'month');
     const sameYear = currentInterestMonth.isSame(nextInterestDateForAccount, 'year');
+    const sameDay = currentInterestMonth.isSame(nextInterestDateForAccount, 'day');
 
-    if (sameMonth && sameYear) {
+    if (sameMonth && sameYear && sameDay) {
       this.addInterest(savingAccount);
       savingAccount.lastInterestAppliedDate = currentInterestMonth.toDate();
     }

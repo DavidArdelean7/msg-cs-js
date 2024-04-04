@@ -1,4 +1,10 @@
-import { checkingAccountA, checkingAccountB, savingsAccountA, savingsAccountB } from './seed/accounts.seed';
+import {
+  checkingAccountA,
+  checkingAccountB,
+  checkingAccountC,
+  savingsAccountA,
+  savingsAccountB,
+} from './seed/accounts.seed';
 import { TransactionManagerServiceInstance } from './services/transaction-manager.service';
 import { SavingsManagerServiceInstance } from './services/savings-manager.service';
 import { seedInitializer } from './seed/seed-initializer';
@@ -24,13 +30,13 @@ console.log('[Transaction Manager] 3.', transaction1);
 console.log('[Transaction Manager] 4.', TransactionManagerServiceInstance.checkFunds(checkingAccountA.id));
 console.log('[Transaction Manager] 5.', TransactionManagerServiceInstance.checkFunds(checkingAccountB.id));
 
-// console.log(
-//   '[Transaction Manager] 6.',
-//   TransactionManagerServiceInstance.withdraw(
-//     checkingAccountC.id,
-//     new MoneyModel({ amount: 5, currency: CurrencyType.EUR })
-//   )
-// );
+console.log(
+  '[Transaction Manager] 6.',
+  TransactionManagerServiceInstance.withdraw(
+    checkingAccountC.id,
+    new MoneyModel({ amount: 5, currency: CurrencyType.EUR })
+  )
+);
 
 console.log('\n------------------------------------\n');
 

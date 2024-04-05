@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import { CapitalizationFrequency } from '../domain/capitalization-frequency.enum';
 import { InterestRate } from '../domain/interest-rate.enum';
 import { CheckingAccountModel } from '../domain/checking-account.model';
-import { card1, card2, card3, card4 } from './cards.seed';
+import { card1, card2, card3, card4, card5, card6 } from './cards.seed';
 
 export const savingsAccountA = new SavingsAccountModel({
   id: 'ROBMSG100001',
@@ -47,4 +47,16 @@ export const checkingAccountD = new CheckingAccountModel({
   transactions: [],
   balance: new MoneyModel({ amount: 1000, currency: CurrencyType.EUR }),
   associatedCard: card4,
+});
+export const checkingAccountE = new CheckingAccountModel({
+  id: 'ROBMSG200005',
+  transactions: [],
+  balance: new MoneyModel({ amount: 200, currency: CurrencyType.EUR }),
+  associatedCard: card5,
+});
+export const checkingAccountF = new CheckingAccountModel({
+  id: 'ROBMSG200006',
+  transactions: [],
+  balance: new MoneyModel({ amount: 1000, currency: CurrencyType.RON }),
+  associatedCard: card6,
 });

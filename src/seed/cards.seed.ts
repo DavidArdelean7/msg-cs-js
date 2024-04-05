@@ -47,3 +47,27 @@ export const card4 = new CardModel({
   dailyWithdrawalLimit: 4000,
   dailyTransactionLimit: 8000,
 });
+
+export const card5 = new CardModel({
+  cardNumber: 5678901234567890,
+  cardHolderName: 'Jack Black',
+  cvv: 232,
+  expirationDate: new Date('2023-02-20'),
+  issueDate: new Date('2019-05-29'),
+  contactless: false,
+  active: false,
+  dailyTransactionLimit: 1000,
+  dailyWithdrawalLimit: 500,
+});
+
+export const card6 = new CardModel({
+  cardNumber: 6789012345678901,
+  cardHolderName: 'Jim Bill',
+  cvv: 421,
+  expirationDate: new Date('2025-02-25'),
+  issueDate: new Date('2012-05-03'),
+  contactless: false,
+  active: true,
+  dailyTransactionLimit: 900,
+  dailyWithdrawalLimit: 500,
+});

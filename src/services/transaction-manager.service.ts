@@ -32,17 +32,19 @@ export class TransactionManagerService {
     if (fromAccount.balance.amount - amountFrom.amount < 0) throw new Error('Insufficient balance');
 
     const transactionId = crypto.randomUUID();
+    const transactionFrom = new TransactionModel({
+      id: transactionId,
+      from: fromAccountId,
+      to: toAccountId,
+      amount: amountFrom,
+      timestamp: dayjs().toDate(),
+    });
+    fromAccount.balance.amount -= amountFrom.amount;
+    fromAccount.transactions = [...fromAccount.transactions, transactionFrom];
+
     if (fromAccount.balance.currency !== toAccount.balance.currency) {
       //if the currency of the accounts is different, the transaction is added accordingly
       const amountTo = convert(value, toAccount.balance.currency);
-      const transactionFrom = new TransactionModel({
-        id: transactionId,
-        from: fromAccountId,
-        to: toAccountId,
-        amount: amountFrom,
-        timestamp: dayjs().toDate(),
-      });
-
       const transactionTo = new TransactionModel({
         id: transactionId,
         from: fromAccountId,
@@ -50,28 +52,15 @@ export class TransactionManagerService {
         amount: amountTo,
         timestamp: dayjs().toDate(),
       });
-
-      fromAccount.balance.amount -= amountFrom.amount;
-      fromAccount.transactions = [...fromAccount.transactions, transactionFrom];
       toAccount.balance.amount += amountTo.amount;
       toAccount.transactions = [...toAccount.transactions, transactionTo];
 
       return [transactionFrom, transactionTo];
     }
-    const transaction = new TransactionModel({
-      id: transactionId,
-      from: fromAccountId,
-      to: toAccountId,
-      amount: amountFrom,
-      timestamp: dayjs().toDate(),
-    });
 
-    fromAccount.balance.amount -= value.amount;
-    fromAccount.transactions = [...fromAccount.transactions, transaction];
-    toAccount.balance.amount += value.amount;
-    toAccount.transactions = [...toAccount.transactions, transaction];
-
-    return [transaction];
+    toAccount.balance.amount += amountFrom.amount;
+    toAccount.transactions = [...toAccount.transactions, transactionFrom];
+    return [transactionFrom];
   }
 
   public withdraw(accountId: string, amount: MoneyModel): TransactionModel {

@@ -3,6 +3,7 @@ import { AccountType } from '../domain/account-type.enum';
 import { SavingsAccountModel } from '../domain/savings-account.model';
 import dayjs from 'dayjs';
 import { CapitalizationFrequency } from '../domain/capitalization-frequency.enum';
+import { CapitalizationInterval } from '../domain/capitalization-interval.map';
 
 export class SavingsManagerService {
   private systemDate = dayjs().toDate();
@@ -21,18 +22,20 @@ export class SavingsManagerService {
   }
 
   //merged both types of capitalization frequency in the same function to avoid code repetition and unnecessary conditional statements
-  //added checking for the day, besides month and year, to prevent erroneously balance increase
+
   private addIntervalInterest(
     savingAccount: SavingsAccountModel,
     currentInterestMonth: dayjs.Dayjs,
     frequency: CapitalizationFrequency
   ): void {
-    const interval = frequency === CapitalizationFrequency.MONTHLY ? 1 : 3;
+    const interval = CapitalizationInterval.get(frequency);
+
+    if (!interval) throw new Error("This type of capitalization frequency hasn't been set");
     const nextInterestDateForAccount = dayjs(savingAccount.lastInterestAppliedDate).add(interval, 'months');
 
     const sameMonth = currentInterestMonth.isSame(nextInterestDateForAccount, 'month');
     const sameYear = currentInterestMonth.isSame(nextInterestDateForAccount, 'year');
-    const sameDay = currentInterestMonth.isSame(nextInterestDateForAccount, 'day');
+    const sameDay = currentInterestMonth.isSame(nextInterestDateForAccount, 'day'); //added checking for the day, besides month and year, to prevent erroneously balance increase
 
     if (sameMonth && sameYear && sameDay) {
       this.addInterest(savingAccount);

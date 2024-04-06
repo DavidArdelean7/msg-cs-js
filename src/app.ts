@@ -23,18 +23,29 @@ console.log('[Transaction Manager] 2.', TransactionManagerServiceInstance.checkF
 const transaction1 = TransactionManagerServiceInstance.transfer(
   checkingAccountA.id,
   checkingAccountB.id,
-  new MoneyModel({ amount: 50, currency: CurrencyType.RON })
+  new MoneyModel({ amount: 50, currency: CurrencyType.RON }),
+  123
 );
 
 console.log('[Transaction Manager] 3.', transaction1);
 console.log('[Transaction Manager] 4.', TransactionManagerServiceInstance.checkFunds(checkingAccountA.id));
 console.log('[Transaction Manager] 5.', TransactionManagerServiceInstance.checkFunds(checkingAccountB.id));
 
+// this card is not active which results in an error
+// console.log(
+//   '[Transaction Manager] 6.',
+//   TransactionManagerServiceInstance.withdraw(
+//     checkingAccountC.id,
+//     new MoneyModel({ amount: 5, currency: CurrencyType.EUR }),
+//     789
+//   )
+// );
 console.log(
   '[Transaction Manager] 6.',
   TransactionManagerServiceInstance.withdraw(
-    checkingAccountC.id,
-    new MoneyModel({ amount: 5, currency: CurrencyType.EUR })
+    checkingAccountB.id,
+    new MoneyModel({ amount: 200, currency: CurrencyType.RON }),
+    456 // cvv needed
   )
 );
 

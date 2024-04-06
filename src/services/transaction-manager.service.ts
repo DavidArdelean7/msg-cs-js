@@ -110,9 +110,8 @@ export class TransactionManagerService {
     if (fromAccount.accountType !== AccountType.CHECKING) return; // apply these checks only for accounts that have associated cards (checking)
 
     const currentDate = dayjs().toDate();
-    const fromCheckingAccount = fromAccount as CheckingAccountModel;
-    if (!fromCheckingAccount.associatedCard!.active || currentDate > fromCheckingAccount.associatedCard!.expirationDate)
-      throw new Error('Inactive or expired card');
+    const card = (fromAccount as CheckingAccountModel).associatedCard!;
+    if (!card.active || currentDate > card.expirationDate) throw new Error('Inactive or expired card');
     // also check if the receiver card is active
     if (type === OperationType.TRANSFER && toAccount.accountType === AccountType.CHECKING)
       if (
@@ -120,13 +119,9 @@ export class TransactionManagerService {
         currentDate > (toAccount as CheckingAccountModel).associatedCard!.expirationDate
       )
         throw new Error('Inactive or expired card');
-    if (type === OperationType.TRANSFER && code !== fromCheckingAccount.associatedCard!.cvv)
-      throw new Error('Incorrect CVV');
+    if (type === OperationType.TRANSFER && code !== card.cvv) throw new Error('Incorrect CVV');
     // check pin code for withdrawals
-    else if (type === OperationType.WITHDRAW && code !== fromCheckingAccount.associatedCard!.pin) {
-      console.log('PIN for card:' + fromCheckingAccount.associatedCard, fromCheckingAccount.associatedCard!.pin);
-      throw new Error('Incorrect PIN');
-    }
+    else if (type === OperationType.WITHDRAW && code !== card.pin) throw new Error('Incorrect PIN');
 
     const transactions = this.retrieveTransactions(fromAccount.id);
     const day = currentDate.getDate();
@@ -146,7 +141,7 @@ export class TransactionManagerService {
       return total + transaction.amount.amount;
     }, 0);
     // verify if the transaction is under the daily limit
-    if (transfersToday + value.amount > fromCheckingAccount.associatedCard!.dailyTransactionLimit)
+    if (transfersToday + value.amount > card.dailyTransactionLimit)
       throw new Error("This transacion would overcome the daily transaction limit for the account's associated card");
     else if (type === OperationType.WITHDRAW) {
       // only withdrawals
@@ -156,7 +151,7 @@ export class TransactionManagerService {
         }
         return total;
       }, 0);
-      if (withdrawalsToday + value.amount > fromCheckingAccount.associatedCard!.dailyWithdrawalLimit)
+      if (withdrawalsToday + value.amount > card.dailyWithdrawalLimit)
         throw new Error("This withdrawal would overcome the daily withdrawal limit for the account's associated card");
     }
   }

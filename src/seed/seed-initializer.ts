@@ -23,10 +23,10 @@ export function seedInitializer(): void {
   AccountsRepository.add(checkingAccountE.id, checkingAccountE);
   AccountsRepository.add(checkingAccountF.id, checkingAccountF);
 
-  CardsRepository.add(card1.cardNumber.toString(), card1);
-  CardsRepository.add(card2.cardNumber.toString(), card2);
-  CardsRepository.add(card3.cardNumber.toString(), card3);
-  CardsRepository.add(card4.cardNumber.toString(), card4);
-  CardsRepository.add(card4.cardNumber.toString(), card5);
-  CardsRepository.add(card4.cardNumber.toString(), card6);
+  // CardsRepository.add(card1.cardNumber.toString(), card1);
+  // CardsRepository.add(card2.cardNumber.toString(), card2);
+  // CardsRepository.add(card3.cardNumber.toString(), card3);
+  // CardsRepository.add(card4.cardNumber.toString(), card4);
+  // CardsRepository.add(card4.cardNumber.toString(), card5);
+  // CardsRepository.add(card4.cardNumber.toString(), card6);
 }

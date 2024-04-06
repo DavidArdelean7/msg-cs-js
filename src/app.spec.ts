@@ -13,7 +13,6 @@ import {
 import { TransactionManagerServiceInstance } from './services/transaction-manager.service';
 import { seedInitializer } from './seed/seed-initializer';
 import { SavingsManagerServiceInstance } from './services/savings-manager.service';
-import { card4 } from './seed/cards.seed';
 
 const errorTypes = {
   balance: 'Insufficient balance',
@@ -52,12 +51,7 @@ function passTime() {
 
 //////////////////////////////////TESTS//////////////////////////////////
 
-test('seeding accounts', () => {
-  seedInitializer();
-  expect(checkingAccountA).toBeDefined();
-  expect(checkingAccountB).toBeDefined();
-  expect(card4).toBeDefined();
-});
+beforeAll(() => seedInitializer());
 
 test('transaction with insufficient balance', () => {
   function testTransaction() {

@@ -10,7 +10,7 @@ import {
   savingsAccountA,
   savingsAccountB,
 } from './accounts.seed';
-import { card1, card2, card3, card4 } from './cards.seed';
+import { card1, card2, card3, card4, card5, card6 } from './cards.seed';
 
 export function seedInitializer(): void {
   console.log('[Seeder]', '-------------Seeding data----------------\n');
@@ -27,4 +27,6 @@ export function seedInitializer(): void {
   CardsRepository.add(card2.cardNumber.toString(), card2);
   CardsRepository.add(card3.cardNumber.toString(), card3);
   CardsRepository.add(card4.cardNumber.toString(), card4);
+  CardsRepository.add(card4.cardNumber.toString(), card5);
+  CardsRepository.add(card4.cardNumber.toString(), card6);
 }

@@ -9,7 +9,7 @@ import { AccountModel } from '../domain/account.model';
 import { OperationType } from '../domain/money-operation-type.enum';
 
 export class TransactionManagerService {
-  public transfer(fromAccountId: string, toAccountId: string, value: MoneyModel): TransactionModel[] {
+  public transfer(fromAccountId: string, toAccountId: string, value: MoneyModel, cvv?: number): TransactionModel[] {
     const fromAccount = AccountsRepository.get(fromAccountId);
     const toAccount = AccountsRepository.get(toAccountId);
 
@@ -28,7 +28,7 @@ export class TransactionManagerService {
     if it was specified that the value of the transaction always has to be the same currency as the sender or the receiver, things were easier
     */
     const amountFrom = convert(value, fromAccount.balance.currency);
-    this.checkCard(fromAccount, toAccount, OperationType.TRANSFER, amountFrom);
+    this.checkCard(fromAccount, toAccount, OperationType.TRANSFER, amountFrom, cvv);
     if (fromAccount.balance.amount - amountFrom.amount < 0) throw new Error('Insufficient balance');
 
     const transactionId = crypto.randomUUID();
@@ -63,7 +63,7 @@ export class TransactionManagerService {
     return [transactionFrom];
   }
 
-  public withdraw(accountId: string, amount: MoneyModel): TransactionModel {
+  public withdraw(accountId: string, amount: MoneyModel, cvv?: number): TransactionModel {
     // the result of a withdrawal is visible as a transaction (from and to the same account)
     const account = AccountsRepository.get(accountId);
 
@@ -72,7 +72,7 @@ export class TransactionManagerService {
       throw new Error('Withdrawal is only permitted for the same currency as the account'); // added this restriction
     if (account.balance.amount - amount.amount < 0) throw new Error('Insufficient balance'); //check the balance before allowing any transactions or withdrawals
 
-    this.checkCard(account, account, OperationType.WITHDRAW, amount);
+    this.checkCard(account, account, OperationType.WITHDRAW, amount, cvv);
 
     const transaction = new TransactionModel({
       id: crypto.randomUUID(),
@@ -100,7 +100,13 @@ export class TransactionManagerService {
     return AccountsRepository.get(accountId)!.transactions;
   }
   // here I assumed that the dailyTransactionLimit applies to all types of transactions (including withdrawals) and dailyWithdrawalLimit applies only to withdrawals
-  public checkCard(fromAccount: AccountModel, toAccount: AccountModel, type: OperationType, value: MoneyModel) {
+  public checkCard(
+    fromAccount: AccountModel,
+    toAccount: AccountModel,
+    type: OperationType,
+    value: MoneyModel,
+    cvv = -1
+  ): void {
     if (fromAccount.accountType !== AccountType.CHECKING) return; // apply these checks only for accounts that have associated cards (checking)
 
     const currentDate = dayjs().toDate();
@@ -114,6 +120,7 @@ export class TransactionManagerService {
         currentDate > (toAccount as CheckingAccountModel).associatedCard!.expirationDate
       )
         throw new Error('Inactive or expired card');
+    if (cvv !== fromCheckingAccount.associatedCard!.cvv) throw new Error('Incorrect CVV');
 
     const transactions = this.retrieveTransactions(fromAccount.id);
     const day = currentDate.getDay;

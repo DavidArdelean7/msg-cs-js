@@ -35,7 +35,7 @@ export class SavingsManagerService {
 
     const sameMonth = currentInterestMonth.isSame(nextInterestDateForAccount, 'month');
     const sameYear = currentInterestMonth.isSame(nextInterestDateForAccount, 'year');
-    const sameDay = currentInterestMonth.isSame(nextInterestDateForAccount, 'day'); //added checking for the day, besides month and year, to prevent erroneously balance increase
+    const sameDay = currentInterestMonth.isSame(nextInterestDateForAccount, 'date'); //added checking for the day, besides month and year, to prevent erroneously balance increase
 
     if (sameMonth && sameYear && sameDay) {
       this.addInterest(savingAccount);

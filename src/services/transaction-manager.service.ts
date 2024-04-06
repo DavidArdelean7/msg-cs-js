@@ -114,7 +114,7 @@ export class TransactionManagerService {
     if (!fromCheckingAccount.associatedCard!.active || currentDate > fromCheckingAccount.associatedCard!.expirationDate)
       throw new Error('Inactive or expired card');
     // also check if the receiver card is active
-    if (toAccount !== fromAccount && toAccount.accountType === AccountType.CHECKING)
+    if (type === OperationType.TRANSFER && toAccount.accountType === AccountType.CHECKING)
       if (
         !(toAccount as CheckingAccountModel).associatedCard!.active ||
         currentDate > (toAccount as CheckingAccountModel).associatedCard!.expirationDate
@@ -123,30 +123,37 @@ export class TransactionManagerService {
     if (cvv !== fromCheckingAccount.associatedCard!.cvv) throw new Error('Incorrect CVV');
 
     const transactions = this.retrieveTransactions(fromAccount.id);
-    const day = currentDate.getDay;
-    const month = currentDate.getMonth;
-    const year = currentDate.getFullYear;
-    let withdrawalsToday = 0, // only withdrawals
-      transfersToday = 0; // all transactions
+    const day = currentDate.getDate();
+    const month = currentDate.getMonth();
+    const year = currentDate.getFullYear();
     // get the amount sum of all transfers and withdrawals of today
-    transactions.forEach(transaction => {
-      if (
-        transaction.timestamp.getFullYear === year &&
-        transaction.timestamp.getMonth === month &&
-        transaction.timestamp.getDay === day
-      ) {
-        transfersToday += transaction.amount.amount;
-        if (transaction.from === transaction.to) withdrawalsToday += transaction.amount.amount;
-      }
+    const filteredTransactions = transactions.filter(transaction => {
+      const transactionDate = new Date(transaction.timestamp);
+      return (
+        transactionDate.getFullYear() === year &&
+        transactionDate.getMonth() === month &&
+        transactionDate.getDate() === day
+      );
     });
+    // all transactions
+    const transfersToday = filteredTransactions.reduce((total, transaction) => {
+      return total + transaction.amount.amount;
+    }, 0);
+
     // verify if the transaction is under the daily limit
     if (transfersToday + value.amount > fromCheckingAccount.associatedCard!.dailyTransactionLimit)
       throw new Error("This transacion would overcome the daily transaction limit for the account's associated card");
-    else if (
-      type === OperationType.WITHDRAW &&
-      withdrawalsToday + value.amount > fromCheckingAccount.associatedCard!.dailyWithdrawalLimit
-    )
-      throw new Error("This withdrawal would overcome the daily withdrawal limit for the account's associated card");
+    else if (type === OperationType.WITHDRAW) {
+      // only withdrawals
+      const withdrawalsToday = filteredTransactions.reduce((total, transaction) => {
+        if (transaction.from === transaction.to) {
+          return total + transaction.amount.amount;
+        }
+        return total;
+      }, 0);
+      if (withdrawalsToday + value.amount > fromCheckingAccount.associatedCard!.dailyWithdrawalLimit)
+        throw new Error("This withdrawal would overcome the daily withdrawal limit for the account's associated card");
+    }
   }
 }
 

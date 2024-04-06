@@ -10,6 +10,7 @@ export const card1 = new CardModel({
   active: true,
   dailyWithdrawalLimit: 5000,
   dailyTransactionLimit: 10000,
+  pin: 1234,
 });
 
 export const card2 = new CardModel({
@@ -22,6 +23,7 @@ export const card2 = new CardModel({
   active: true,
   dailyWithdrawalLimit: 3000,
   dailyTransactionLimit: 7000,
+  pin: 2345,
 });
 
 export const card3 = new CardModel({
@@ -34,6 +36,7 @@ export const card3 = new CardModel({
   active: false,
   dailyWithdrawalLimit: 2000,
   dailyTransactionLimit: 5000,
+  pin: 3456,
 });
 
 export const card4 = new CardModel({
@@ -46,6 +49,7 @@ export const card4 = new CardModel({
   active: true,
   dailyWithdrawalLimit: 4000,
   dailyTransactionLimit: 8000,
+  pin: 4567,
 });
 
 export const card5 = new CardModel({
@@ -58,6 +62,7 @@ export const card5 = new CardModel({
   active: false,
   dailyTransactionLimit: 1000,
   dailyWithdrawalLimit: 500,
+  pin: 5678,
 });
 
 export const card6 = new CardModel({
@@ -70,4 +75,5 @@ export const card6 = new CardModel({
   active: true,
   dailyTransactionLimit: 900,
   dailyWithdrawalLimit: 500,
+  pin: 6789,
 });

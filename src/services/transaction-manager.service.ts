@@ -63,7 +63,7 @@ export class TransactionManagerService {
     return [transactionFrom];
   }
 
-  public withdraw(accountId: string, amount: MoneyModel, cvv?: number): TransactionModel {
+  public withdraw(accountId: string, amount: MoneyModel, pin?: number): TransactionModel {
     // the result of a withdrawal is visible as a transaction (from and to the same account)
     const account = AccountsRepository.get(accountId);
 
@@ -72,7 +72,7 @@ export class TransactionManagerService {
       throw new Error('Withdrawal is only permitted for the same currency as the account'); // added this restriction
     if (account.balance.amount - amount.amount < 0) throw new Error('Insufficient balance'); //check the balance before allowing any transactions or withdrawals
 
-    this.checkCard(account, account, OperationType.WITHDRAW, amount, cvv);
+    this.checkCard(account, account, OperationType.WITHDRAW, amount, pin);
 
     const transaction = new TransactionModel({
       id: crypto.randomUUID(),
@@ -105,7 +105,7 @@ export class TransactionManagerService {
     toAccount: AccountModel,
     type: OperationType,
     value: MoneyModel,
-    cvv = -1
+    code = -1
   ): void {
     if (fromAccount.accountType !== AccountType.CHECKING) return; // apply these checks only for accounts that have associated cards (checking)
 
@@ -120,7 +120,13 @@ export class TransactionManagerService {
         currentDate > (toAccount as CheckingAccountModel).associatedCard!.expirationDate
       )
         throw new Error('Inactive or expired card');
-    if (cvv !== fromCheckingAccount.associatedCard!.cvv) throw new Error('Incorrect CVV');
+    if (type === OperationType.TRANSFER && code !== fromCheckingAccount.associatedCard!.cvv)
+      throw new Error('Incorrect CVV');
+    // check pin code for withdrawals
+    else if (type === OperationType.WITHDRAW && code !== fromCheckingAccount.associatedCard!.pin) {
+      console.log('PIN for card:' + fromCheckingAccount.associatedCard, fromCheckingAccount.associatedCard!.pin);
+      throw new Error('Incorrect PIN');
+    }
 
     const transactions = this.retrieveTransactions(fromAccount.id);
     const day = currentDate.getDate();
@@ -139,7 +145,6 @@ export class TransactionManagerService {
     const transfersToday = filteredTransactions.reduce((total, transaction) => {
       return total + transaction.amount.amount;
     }, 0);
-
     // verify if the transaction is under the daily limit
     if (transfersToday + value.amount > fromCheckingAccount.associatedCard!.dailyTransactionLimit)
       throw new Error("This transacion would overcome the daily transaction limit for the account's associated card");

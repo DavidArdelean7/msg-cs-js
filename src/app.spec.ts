@@ -22,6 +22,7 @@ const errorTypes = {
   dailyTransactionLimit: "This transacion would overcome the daily transaction limit for the account's associated card",
   dailyWithdrawalLimit: "This withdrawal would overcome the daily withdrawal limit for the account's associated card",
   cvv: 'Incorrect CVV',
+  pin: 'Incorrect PIN',
 };
 let months = 0;
 
@@ -40,8 +41,8 @@ function transact(
   );
 }
 
-function withdraw(client: CheckingAccountModel, amount: number, currency: CurrencyType, cvv?: number) {
-  TransactionManagerServiceInstance.withdraw(client.id, new MoneyModel({ amount: amount, currency: currency }), cvv);
+function withdraw(client: CheckingAccountModel, amount: number, currency: CurrencyType, pin?: number) {
+  TransactionManagerServiceInstance.withdraw(client.id, new MoneyModel({ amount: amount, currency: currency }), pin);
 }
 
 function passTime() {
@@ -82,7 +83,7 @@ test('forbidden currency withdrawal', () => {
 });
 
 test('allowed withdrawal', () => {
-  withdraw(checkingAccountB, 200, CurrencyType.RON, 456);
+  withdraw(checkingAccountB, 200, CurrencyType.RON, 2345);
 
   expect(checkingAccountB.balance.amount).toBe(200);
   expect(
@@ -163,12 +164,8 @@ test('expired card', () => {
 
 test('incorrect cvv', () => {
   //correct cvv is 421
-  function testWithdrawal() {
-    withdraw(checkingAccountF, 150, CurrencyType.RON, 591);
-  }
-  expect(testWithdrawal).toThrowError(errorTypes.cvv);
   function testTransaction() {
-    transact(checkingAccountF, checkingAccountA, 300, CurrencyType.RON, 422);
+    transact(checkingAccountF, checkingAccountA, 300, CurrencyType.RON, 6789);
   }
   expect(testTransaction).toThrowError(errorTypes.cvv);
 });
@@ -190,14 +187,22 @@ test('daily transaction limit', () => {
 test('daily withdrawal limit', () => {
   // account's F associated card has a low daily withdrawal limit: 500
   function testWithdrawalWithinDailyLimit() {
-    withdraw(checkingAccountF, 400, CurrencyType.RON, 421);
+    withdraw(checkingAccountF, 400, CurrencyType.RON, 6789);
   }
   expect(testWithdrawalWithinDailyLimit).not.toThrowError(errorTypes.dailyTransactionLimit);
   expect(checkingAccountF.balance.amount).toBe(300);
 
   function testWithdrawalOutsideDailyLimit() {
-    withdraw(checkingAccountF, 150, CurrencyType.RON, 421);
+    withdraw(checkingAccountF, 150, CurrencyType.RON, 6789);
   }
   expect(testWithdrawalOutsideDailyLimit).toThrowError(errorTypes.dailyWithdrawalLimit);
   expect(checkingAccountF.balance.amount).toBe(300);
+});
+
+test('incorrect pin code', () => {
+  //correct pin code is 6789
+  function testWithdrawal() {
+    withdraw(checkingAccountF, 150, CurrencyType.RON, 591);
+  }
+  expect(testWithdrawal).toThrowError(errorTypes.pin);
 });

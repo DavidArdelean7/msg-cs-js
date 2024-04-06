@@ -8,6 +8,7 @@ export class CardModel {
   active!: boolean; // A boolean indicating whether the card is currently active or has been deactivated
   dailyWithdrawalLimit!: number; // The maximum amount of money that can be withdrawn from the card in a day
   dailyTransactionLimit!: number; // The maximum amount of money that can be spent using the card in a day.
+  pin!: number; // code used for withdrawals
 
   constructor(values: CardModel) {
     if (values) {
@@ -20,6 +21,7 @@ export class CardModel {
       this.active = values.active;
       this.dailyWithdrawalLimit = values.dailyWithdrawalLimit;
       this.dailyTransactionLimit = values.dailyTransactionLimit;
+      this.pin = values.pin;
     }
   }
 }
